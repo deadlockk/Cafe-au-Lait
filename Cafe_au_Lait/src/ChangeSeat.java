@@ -1,114 +1,133 @@
-
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
+
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
-public class ChangeSeat extends Main_page {
-	JFrame ChangeFrame;
-	JLabel head;
+public class ChangeSeat extends Main_page 
+{
+   JFrame ChangeFrame;
+   JPanel contentPane;
+   JLabel head;
+   PrintWriter out;
+   String txt_1, txt_2, text;
 
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ChangeSeat framechange = new ChangeSeat();
-					framechange.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+   public static void main(String[] args) 
+   {
+      EventQueue.invokeLater(new Runnable() {
+         public void run() {
+            try 
+            {
+               ChangeSeat framechange = new ChangeSeat();
+               framechange.ChangeFrame.setVisible(true);
+            } 
+            catch (Exception e) 
+            {
+               e.printStackTrace();
+            }
+         }
+      });
+   }
 
-	private final JPanel panel = new JPanel();
-	private JTextField textField;
-	private JTextField textField_1;
+   private String getServerAddress() 
+   {
+      return "127.0.0.1";
+    //   return "192.168.35.16";
+   }
 
-	public ChangeSeat() {
+   private JTextField CardField;
+   private JTextField Tablefield;
 
-		ChangeFrame = new JFrame();
-		ChangeFrame.setSize(400, 400);
-		panel.setBackground(new Color(189, 183, 107));
-		ChangeFrame.getContentPane().add(panel);
-		ChangeFrame.setTitle("ChangeSeat");
-		ChangeFrame.setVisible(true);
-		panel.setLayout(null);
+   public ChangeSeat() throws IOException 
+   {
+      String serverAddress = getServerAddress();
+      Socket socket = new Socket(serverAddress, 9001);
 
-		textField = new JTextField();
-		textField.setBounds(33, 184, 116, 24);
-		panel.add(textField);
-		textField.setColumns(10);
+      in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+      out = new PrintWriter(socket.getOutputStream(), true);
 
-		textField_1 = new JTextField();
-		textField_1.setBounds(235, 184, 116, 24);
-		panel.add(textField_1);
-		textField_1.setColumns(10);
+     ChangeFrame = new JFrame();
+     ChangeFrame.setTitle("Change the seat"); // Frame의 타이틀 이름 주기s
+     ChangeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+     ChangeFrame.setSize(800, 800); // Frame의 크기 설정
+     ImageIcon background = new ImageIcon("changeseat.png");
+     contentPane = new JPanel() {
+      public void paintComponent(Graphics g) {
+         g.drawImage(background.getImage(), 0, 0, 800, 800, null);
+         setOpaque(false);// 배경 띄워주기s
+         super.paintComponent(g);
+      }
+   };
 
-		JButton imoticon = new JButton(new ImageIcon("espresso.png"));
-		imoticon.setBounds(156, 45, 74, 71);
-		imoticon.setBorderPainted(false);
-		panel.add(imoticon);
-		
-		
-		JTextPane txtpnCardNumber = new JTextPane();
-		txtpnCardNumber.setFont(new Font("양재블럭체", Font.BOLD | Font.ITALIC, 16));
-		txtpnCardNumber.setBackground(new Color(189, 183, 107));
-		txtpnCardNumber.setText("Card Number");
-		txtpnCardNumber.setBounds(33, 132, 112, 40);
-		panel.add(txtpnCardNumber);
+   contentPane.setVisible(true);
+   ChangeFrame.getContentPane().add(contentPane);
+   ChangeFrame.setVisible(true);
+   contentPane.setLayout(null);
+   Tablefield = new JTextField();
+   Tablefield.setHorizontalAlignment(SwingConstants.CENTER);
+   Tablefield.setForeground(new Color(0, 0, 102));
+   Tablefield.setFont(new Font("Franklin Gothic Demi Cond", Font.PLAIN, 30));
+   Tablefield.setBounds(299, 321, 209, 48);
+   contentPane.add(Tablefield);
+   Tablefield.setColumns(10);
 
-		JTextPane txtpnTableNumber = new JTextPane();
-		txtpnTableNumber.setFont(new Font("양재블럭체", Font.BOLD | Font.ITALIC, 16));
-		txtpnTableNumber.setBackground(new Color(189, 183, 107));
-		txtpnTableNumber.setText("Table Number");
-		txtpnTableNumber.setBounds(235, 132, 116, 40);
-		panel.add(txtpnTableNumber);
-
-		JButton btnNewButton = new JButton("\uC804\uC1A1");
-		btnNewButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent arg0) {
-				btnNewButton.setBackground(new Color(211, 211, 211));
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				btnNewButton.setBackground(new Color(189, 183, 107));
-			}
-		});
-		btnNewButton.setIcon(null);
-		btnNewButton.setForeground(new Color(0, 0, 0));
-		btnNewButton.setBackground(new Color(189, 183, 107));
-		btnNewButton.setFont(new Font("휴먼편지체", Font.BOLD, 20));
-		btnNewButton.setBounds(150, 236, 80, 55);
-		btnNewButton.setBorderPainted(false);
-		panel.add(btnNewButton);
-
-		JButton back = new JButton("Go back");
-		back.setIcon(new ImageIcon(CheckSeat.class.getResource("/com/sun/javafx/scene/web/skin/Undo_16x16_JFX.png")));
-		back.setFont(new Font("HY엽서L", Font.ITALIC, 10));
-		back.setFocusable(false);
-		back.setBounds(14, 314, 123, 27);
-		panel.add(back);
-
-		back.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ChangeFrame.setVisible(false);
-				Main_page.frame.setVisible(true);
-			}
-		});
-
-	}
+   CardField = new JTextField();
+   CardField.setHorizontalAlignment(SwingConstants.CENTER);
+   CardField.setForeground(new Color(0, 0, 102));
+   CardField.setFont(new Font("Franklin Gothic Demi Cond", Font.PLAIN, 30));
+   CardField.setBounds(299, 508, 209, 48);
+   contentPane.add(CardField);
+   CardField.setColumns(10);
+      
+      JButton go_back = new JButton("BACK");
+      go_back.setForeground(new Color(255, 215, 0));
+      go_back.setFont(new Font("Franklin Gothic Demi Cond", Font.PLAIN, 35));
+      go_back.setBounds(215, 644, 122, 27);
+      contentPane.add(go_back);
+      go_back.setContentAreaFilled(false);
+      go_back.setBorderPainted(false);
+      go_back.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent arg0) {
+             ChangeFrame.setVisible(false);
+             Main_page.frame.setVisible(true);
+          }
+       });
+      
+      JButton send = new JButton("SEND");
+      send.setForeground(new Color(255, 215, 0));
+      send.setFont(new Font("Franklin Gothic Demi Cond", Font.PLAIN, 35));
+      send.setContentAreaFilled(false);
+      send.setBorderPainted(false);
+      send.setBounds(469, 644, 122, 27);
+      contentPane.add(send);
+  
+       send.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+             txt_1 = "Table : " + Tablefield.getText();
+             txt_2 = "Card : " + CardField.getText();
+             text = txt_1 + txt_2;
+             out.println("CH" + text);
+             ChangeFrame.setVisible(false);
+             Main_page.frame.setVisible(true);
+          }
+       });
+   }
 }

@@ -7,114 +7,139 @@ import java.io.PrintWriter;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import java.awt.Label;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.awt.Font;
+import java.awt.Graphics;
 
-public class Reservation extends JFrame {
-	private JFrame frame;
-	private JTextField chatInput;
-	private JTextArea chatRoom;
-	private JTextArea chatRoom_1;
-	BufferedReader in;
-	PrintWriter out;
+public class Reservation implements Runnable 
+{
+   JFrame RESframe;
+   JPanel RESpanel;
+   JTextField chatInput;
+   JTextArea chatRoom;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Reservation window = new Reservation();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+   // Socket 사용을 위한 변수.
+   BufferedReader in;
+   PrintWriter out;
+   String txt_1, txt_2, text;
+   // static int k = 0;
 
-	//
-	// private void chatRun() throws IOException {
-	//
-	// // Make connection and initialize streams
-	// String serverAddress = getServerAddress();
-	// Socket socket = new Socket(serverAddress, 8888);
-	// in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	// out = new PrintWriter(socket.getOutputStream(), true);
-	//
-	// // Process all messages from server, according to the protocol.
-	// {
-	// String line = in.readLine();
-	// if (line.startsWith("SUBMITNAME")) {
-	// out.println(getName());
-	// } else if (line.startsWith("NAMEACCEPTED")) {
-	// chatInput.setEditable(true);
-	// } else if (line.startsWith("MESSAGE")) {
-	// chatRoom.append(line.substring(8) + "\n");
-	// }
-	// }
-	// }
-	//
-	// private String getServerAddress() {
-	// return JOptionPane.showInputDialog(frame, "Enter IP Address of the
-	// Server:", "Welcome to the Chatter",
-	// JOptionPane.QUESTION_MESSAGE);
-	// }
-	//
-	// private String getName() {
-	// return JOptionPane.showInputDialog(frame, "Choose a screen name:",
-	// "Screen name selection",
-	// JOptionPane.PLAIN_MESSAGE);
-	// }
-	/**
-	 * Create the frame.
-	 */
-	public Reservation() {
+   public static void main(String[] args) 
+   {
+      EventQueue.invokeLater(new Runnable() {
+         public void run() {
+            try {
+               Reservation window = new Reservation();
+               window.RESframe.setVisible(true);
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+         }
+      });
+   }
 
-		getContentPane().setBackground(new Color(189, 183, 107));
-		getContentPane().setLayout(null);
-		setResizable(false);
+   private String getServerAddress() 
+   {
+      return "127.0.0.1";
+      // return "192.168.35.16";
+   }
 
-		Label label = new Label();
-		label.setBounds(129, 45, 331, 77);
-		label.setAlignment(Label.CENTER);
-		label.setText("우리 이거 다 할 수 있을까....");
+   public Reservation() 
+   {
+      RESframe = new JFrame();
+      RESframe.setSize(800, 800); // Frame의 크기 설정
+      ImageIcon chat = new ImageIcon("chat.png");
+      RESpanel = new JPanel() {
+         public void paintComponent(Graphics g) {
+            g.drawImage(chat.getImage(), 0, 0, null);
+            setOpaque(false);// 배경 띄워주기
+            super.paintComponent(g);
+         }
+      };
+      RESpanel.setLayout(null);
+      RESframe.getContentPane().add(RESpanel);
 
-		getContentPane().add(label);
+      JButton send = new JButton("SEND");
+      send.setBackground(new Color(0, 0, 0));
+      send.setFont(new Font("Franklin Gothic Demi Cond", Font.PLAIN, 20));
+      send.setForeground(new Color(255, 215, 0));
+      send.setBounds(544, 598, 76, 51);
+      RESpanel.add(send);
 
-		chatInput = new JTextField();
-		chatInput.setBounds(55, 460, 484, 39);
-		getContentPane().add(chatInput);
-		chatInput.setColumns(10);
-		chatInput.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// out.println(chatInput.getText());
+      send.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent arg0) {
+            chatRoom.append(chatInput.getText() + '\n');
+            chatInput.setText("");
+         }
+      });
 
-				chatRoom.append(chatInput.getText() + '\n');
-				chatInput.setText("");
-			}
-		});
+      chatInput = new JTextField();
+      chatInput.setFont(new Font("HY헤드라인M", Font.PLAIN, 20));
+      chatInput.setBounds(115, 598, 415, 51);
+      RESpanel.add(chatInput);
+      chatInput.setColumns(10);
 
-		chatRoom = new JTextArea();
-		JButton send = new JButton("전송");
-		send.setBounds(706, 458, 76, 39);
-		getContentPane().add(send);
-		chatRoom = new JTextArea();
-		chatRoom.setBounds(55, 190, 484, 225);
-		getContentPane().add(chatRoom);
-		chatRoom.setEditable(false);
+      chatInput.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent arg0) {
+            out.println("RE" + Server.client_num + chatInput.getText());
+            chatRoom.append("<Client> : " + chatInput.getText() + '\n');
+            chatInput.setText("");
+         }
+      });
 
-		send.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				chatRoom.append(chatInput.getText() + '\n');
-				chatInput.setText("");
-			}
-		});
-		setBounds(100, 100, 603, 597);
-	}
+      chatRoom = new JTextArea();
+      chatRoom.setFont(new Font("HY헤드라인M", Font.PLAIN, 20));
+      chatRoom.setBounds(115, 228, 568, 328);
+      RESpanel.add(chatRoom);
+      chatRoom.setEditable(false);
+      RESframe.setBounds(100, 100, 800, 800);
+   }
+
+   @Override
+   public void run()
+   {
+      String serverAddress = getServerAddress();
+      Socket socket;
+
+      try 
+      {
+         socket = new Socket(serverAddress, 9001);
+         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+         out = new PrintWriter(socket.getOutputStream(), true);
+
+      } 
+      catch (UnknownHostException e) 
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      } 
+      catch (IOException e) 
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+
+      while (true) 
+      {
+         String line = null;
+         try 
+         {
+            line = in.readLine();
+         } 
+         catch (IOException e) 
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+         chatRoom.append("<From Server> : " + line + '\n');
+      }
+   }
 }
