@@ -34,10 +34,13 @@ public class Reservation implements Runnable
    {
       EventQueue.invokeLater(new Runnable() {
          public void run() {
-            try {
+            try 
+            {
                Reservation window = new Reservation();
                window.RESframe.setVisible(true);
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                e.printStackTrace();
             }
          }
